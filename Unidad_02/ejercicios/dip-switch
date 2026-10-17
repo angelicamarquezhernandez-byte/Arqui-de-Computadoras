@@ -1,0 +1,24 @@
+; Programa: Lectura de Dip Switch y salida en LEDs
+
+.include "m328pdef.inc"     ; Definiciones para ATmega328P
+
+.org 0x0000
+    rjmp RESET              ; Vector de Reset
+
+RESET:
+    ; Configurar Puerto C (PINC) como entrada para el Dip Switch
+    ldi r16, 0x00
+    out DDRC, r16
+
+    ; Habilitar resistencias Pull-up internas en el Puerto C (opcional pero recomendado)
+    ldi r16, 0xFF
+    out PORTC, r16
+
+    ; Configurar Puerto D (PORTD) como salida para los LEDs
+    ldi r16, 0xFF
+    out DDRD, r16
+
+MAIN_LOOP:
+    in r16, PINC            ; Leer el estado actual del Dip Switch desde el Puerto C
+    out PORTD, r16          ; Reflejar el valor leído directamente en los LEDs del Puerto D
+    rjmp MAIN_LOOP          ; Repetir el ciclo de lectura continuamente

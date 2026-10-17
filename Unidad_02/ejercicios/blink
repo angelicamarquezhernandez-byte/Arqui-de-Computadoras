@@ -1,0 +1,44 @@
+
+; Programa: Blink 
+
+
+.include "m328pdef.inc"      ; Definiciones para el microcontrolador (ej. ATmega328P)
+
+.org 0x0000
+    rjmp RESET
+
+RESET:
+    ; Configurar el pin de salida (por ejemplo, PB5 como salida para el LED integrado)
+    sbi DDRB, DDB5
+
+MAIN_LOOP:
+    ; Encender el LED
+    sbi PORTB, PORTB5
+    rcall DELAY
+
+    ; Apagar el LED
+    cbi PORTB, PORTB5
+    rcall DELAY
+
+    rjmp MAIN_LOOP
+
+; =====================================================================
+; Subrutina de Retraso Decremental Anidado
+; =====================================================================
+DELAY:
+    ldi R18, 0x20       ; Carga el valor inicial para R18[cite: 8]
+DELAY1:
+    ldi R19, 0xFF       ; Carga el valor inicial para R19[cite: 8]
+DELAY2:
+    ldi R20, 0xFF       ; Carga el valor inicial para R20[cite: 8]
+DELAY3:
+    subi R20, 1         ; Decrementa R20 en 1[cite: 8]
+    brne DELAY3         ; Salta a DELAY3 si no es cero[cite: 8]
+    
+    subi R19, 1         ; Decrementa R19 en 1[cite: 8]
+    brne DELAY2         ; Salta a DELAY2 si no es cero[cite: 8]
+    
+    subi R18, 1         ; Decrementa R18 en 1[cite: 8]
+    brne DELAY1         ; Salta a DELAY1 si no es cero[cite: 8]
+    
+    ret                 ; Regresa al programa principal[cite: 8]

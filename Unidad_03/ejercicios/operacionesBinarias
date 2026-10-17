@@ -1,0 +1,52 @@
+
+.include "m328pdef.inc"     ; Definiciones para ATmega328P
+
+.org 0x0000
+    rjmp RESET              ; Vector de Reset
+
+RESET:
+    ; Configurar el Puerto D como salida para ver el resultado en los LEDs
+    ldi r16, 0xFF
+    out DDRD, r16
+
+MAIN_LOOP:
+    ; Cargar valores de prueba en los registros r16 y r17
+    ldi r16, 0b10101010     ; Dato A
+    ldi r17, 0b11001100     ; Dato B
+
+    ; -- Ejemplo de AND --
+    mov r18, r16            ; Copiar r16 a r18
+    and r18, r17            ; r18 = r16 AND r17
+    out PORTD, r18          ; Mostrar resultado en LEDs
+    rcall DELAY             ; Retardo para visualizar
+
+    ; -- Ejemplo de OR --
+    mov r18, r16
+    or r18, r17             ; r18 = r16 OR r17
+    out PORTD, r18
+    rcall DELAY
+
+    ; -- Ejemplo de EOR (XOR) --
+    mov r18, r16
+    eor r18, r17            ; r18 = r16 XOR r17
+    out PORTD, r18
+    rcall DELAY
+
+    ; -- Ejemplo de COM (NOT/Complemento) --
+    mov r18, r16
+    com r18                 ; r18 = NOT r18 (Invierte los bits)
+    out PORTD, r18
+    rcall DELAY
+
+    rjmp MAIN_LOOP          ; Repetir el ciclo
+
+; Subrutina de Retardo (Delay)
+
+DELAY:
+    ldi r20, 100
+D1: ldi r21, 200
+D2: dec r21
+    brne D2
+    dec r20
+    brne D1
+    ret

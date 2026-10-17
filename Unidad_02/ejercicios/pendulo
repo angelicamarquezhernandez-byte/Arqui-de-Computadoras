@@ -1,0 +1,48 @@
+.include "m328pdef.inc"     ; Encabezado de definiciones para ATmega328P
+
+.org 0x0000
+    rjmp RESET              ; Vector de Reset
+
+RESET:
+    ; Configurar todo el Puerto D (PD0 - PD7) como salidas
+    ldi r16, 0xFF
+    out DDRD, r16
+
+    ; Cargar la posición inicial del LED (primer bit activo: 0000 0001)
+    ldi r16, 0x01
+
+MAIN_LOOP:
+    ; -- Desplazamiento a la izquierda (PD0 a PD7) --
+IZQUIERDA:
+    out PORTD, r16          ; Encender el LED correspondiente en Puerto D
+    rcall DELAY             ; Esperar retardo
+    lsl r16                 ; Desplazar bit a la izquierda (Shift Left)
+    brcc IZQUIERDA          ; Si el Carry no está activo, continuar a la izquierda
+
+    ; Al salir del bucle, r16 queda en 0x00, lo ajustamos al bit 6 (0100 0000)
+    ; para iniciar el regreso hacia la derecha
+    ldi r16, 0x40
+
+    ; -- Desplazamiento a la derecha (PD6 a PD1) --
+DERECHA:
+    out PORTD, r16          ; Encender el LED correspondiente
+    rcall DELAY             ; Esperar retardo
+    lsr r16                 ; Desplazar bit a la derecha (Shift Right)
+    cpi r16, 0x01           ; ¿Llegamos al primer LED (PD0)?
+    brne DERECHA            ; Si no es igual, continuar a la derecha
+
+    rjmp MAIN_LOOP          ; Repetir el ciclo infinito del péndulo
+
+;-- Subrutina de Retardo (Delay) --
+
+DELAY:
+    ldi r17, 100
+L1: ldi r18, 200
+L2: ldi r19, 250
+L3: dec r19
+    brne L3
+    dec r18
+    brne L2
+    dec r17
+    brne L1
+    ret
