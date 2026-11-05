@@ -1,0 +1,42 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+// Rutina de servicio de interrupción para INT0
+ISR(INT0_vect) {
+    // Alterna el estado del LED en PB5 cada vez que ocurre la interrupción
+    PORTB ^= (1 << PORTB5);
+}
+
+int main(void) {
+    // 1. Configuración de Puertos
+    DDRB |= (1 << DDB5);    // Pone el pin PB5 como salida (para el LED)
+    DDRD &= ~(1 << DDD2);   // Pone el pin PD2 (INT0) como entrada
+    PORTD |= (1 << PORTD2); // Activa la resistencia Pull-up interna en PD2
+
+    // 2. Configuración del modo de disparo de la interrupción (EICRA)
+    // Elige UNA de las 4 opciones siguientes según el programa que estés probando:
+    
+    // OPCIÓN A: Nivel bajo (Low level) genera interrupción constante mientras esté presionado
+    // EICRA &= ~((1 << ISC01) | (1 << ISC00));
+
+    // OPCIÓN B: Cualquier cambio lógico (Rising or Falling edge)
+    // EICRA = (EICRA & ~(1 << ISC01)) | (1 << ISC00);
+
+    // OPCIÓN C: Flanco de bajada (Falling edge) - [Ejemplo del pizarrón]
+    EICRA |= (1 << ISC01);
+    EICRA &= ~(1 << ISC00);
+
+    // OPCIÓN D: Flanco de subida (Rising edge)
+    // EICRA |= (1 << ISC01) | (1 << ISC00);
+
+    // 3. Habilitación de la interrupción
+    EIFR = (1 << INTF0);    // Limpia la bandera de interrupción pendiente
+    EIMSK |= (1 << INT0);   // Habilita la interrupción externa 0 (INT0)
+
+    // 4. Activa las interrupciones globales
+    sei();                  
+
+    while(1) {
+        // El ciclo principal puede realizar otras tareas o estar vacíos
+    }
+}
